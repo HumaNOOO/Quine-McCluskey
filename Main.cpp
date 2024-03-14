@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 unsigned long long c = 0;
+bool english = true;
 
 class Timer
 {
@@ -17,7 +18,8 @@ public:
 
 	~Timer()
 	{
-		std::cout << "\nCZAS WYKONYWANIA ALGORYTMU: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() / 1000.0 << "s\n";
+		if(english) std::cout << "\nALGORITHM EXECUTION DURATION: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() / 1000.0 << "s\n";
+		else std::cout << "\nCZAS WYKONYWANIA ALGORYTMU: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() / 1000.0 << "s\n";
 	}
 
 private:
@@ -26,7 +28,7 @@ private:
 
 bool isOperator(const char c)
 {
-	return c == '+' || c == '*' || c == '|' || c == '!' || c == '-' || c == '/' || c == '&';
+	return c == '+' || c == '*' || c == '!';
 }
 
 std::stack<char> shuntingYardLog(const std::string_view& str)
@@ -447,24 +449,6 @@ std::vector<int> truthTable(std::stack<char> cops, std::string& var)
 	return minterms;
 }
 
-std::string applyDeMorgans(std::string str)
-{
-	if (str.find('!') == std::string::npos) return str;
-
-	for (int i = 0; i < str.size(); i++)
-	{
-		if (str[i] == '!' && i < str.size() - 1 && str[i + 1] != '(')
-		{
-			str.insert(str.begin() + i, '(');
-			str.insert(str.begin() + i + 3, ')');
-			std::cout << str << '\n';
-			i += 2;
-		}
-	}
-
-	return str;
-}
-
 struct Impl
 {
 	Impl(const std::string& w, bool ess = true) : word(w), essential(ess), minterms() {}
@@ -552,8 +536,6 @@ void generateCombinations(const std::vector<Impl>& prime_implicants, const std::
 {
 	const int max_combs = std::pow(2, prime_implicants.size());
 
-	//std::cout << "POSSIBLE COMBS: " << '\n';
-
 	std::vector<std::string> permutations;
 	std::string shortest_comb;
 	int least_minterms = std::numeric_limits<int>::max();
@@ -590,7 +572,8 @@ void generateCombinations(const std::vector<Impl>& prime_implicants, const std::
 	//std::cout << "\n\nshortest comb: " << shortest_comb << "\n\n";
 	permutations = getPermutations(shortest_comb);
 
-	std::cout << "\nMOZLIWE FORMY MINIMALNE: " << permutations.size() << '\n';
+	if(english) std::cout << "\nPOSSIBLE MINIMAL FORMS: " << permutations.size() << '\n';
+	else std::cout << "\nMOZLIWE FORMY MINIMALNE: " << permutations.size() << '\n';
 
 	for (const std::string& permutation : permutations)
 	{
@@ -623,7 +606,9 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 {
 	if (minterms.empty())
 	{
-		std::cout << "\nFORMA MINIMALNA: 0\n";
+		if (english) std::cout << "\nMINIMAL FORM: 0\n";
+		else std::cout << "\nFORMA MINIMALNA: 0\n";
+
 		return;
 	}
 
@@ -657,7 +642,8 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 
 	while (!temp_vec.empty())
 	{
-		std::cout << "ETAP " << g << ": ";
+		if(english) std::cout << "STAGE " << g << ": ";
+		else std::cout << "ETAP " << g << ": ";
 
 		temp_vec.clear();
 		for (int i = 0; i < groups[g].size(); i++)
@@ -692,7 +678,7 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 			}
 		}
 
-		for (int j = 0; j <= length; j++)
+		/*for (int j = 0; j <= length; j++)
 		{
 			//std::cout << "\nLICZBA JEDYNEK: " << j << '\n';
 
@@ -716,10 +702,7 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 			{
 				//std::cout << "-\n";
 			}
-		}
-		//std::cout << '\n';
-
-		//if (temp_vec.empty()) break;
+		}*/
 
 		std::ranges::sort(temp_vec, [](const Impl& lhs, const Impl& rhs) {return lhs.word > rhs.word; });
 		temp_vec.erase(std::unique(temp_vec.begin(), temp_vec.end(), [](const Impl& lhs, const Impl& rhs) {return lhs.word.compare(rhs.word) == 0; }), temp_vec.end());
@@ -741,7 +724,8 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 		std::cout << "OK\n";
 	}
 
-	std::cout << "\n================== IMPLIKANTY PROSTE ==================\n\n";
+	if(english) std::cout << "\n================== SIMPLE IMPLICANTS ==================\n\n";
+	else std::cout << "\n================== IMPLIKANTY PROSTE ==================\n\n";
 
 	std::vector<Impl> prime_implicants;
 	for (const auto& stage : groups)
@@ -759,7 +743,9 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 		}
 	}
 
-	std::cout << "\n================== TABLICA POKRYCIA ==================\n\n";
+	if(english) std::cout << "\n================== TABLE OF COVERAGE ==================\n\n";
+	else std::cout << "\n================== TABLICA POKRYCIA ==================\n\n";
+
 	for (int i = 0; i < length; i++) std::cout << ' ';
 
 	prime_implicants.erase(std::remove_if(prime_implicants.begin(), prime_implicants.end(),
@@ -781,8 +767,6 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 	{
 		std::cout << '|' << impl.word;
 	}
-	//std::cout << '\n';
-	//for (int i = 0; i < 3 + prime_implicants.size() * 4; i++) std::cout << '_';
 
 	std::cout << '\n';
 
@@ -822,7 +806,8 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 
 	//std::cout << "implicants: " << coverage_table.size() << " minterms: " << coverage_table[0].size() << '\n';
 
-	std::cout << "\n================== IMPLIKANTY ISTOTNE ==================\n\n";
+	if(english) std::cout << "\n================== ESSENTIAL IMPLICANTS ==================\n\n";
+	else std::cout << "\n================== IMPLIKANTY ISTOTNE ==================\n\n";
 
 	std::vector<std::string> essential_prime_implicants;
 	//std::set<int> for_combinations;
@@ -836,7 +821,6 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 			if (coverage_table[j][i])
 			{
 				pos = j;
-				//for_combinations.insert(i);
 				covered_count++;
 			}
 		}
@@ -896,16 +880,9 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 			if (coverage_table[i][j])
 			{
 				coverage_vector[i].push_back(minterms[j]);
-				//std::cout << "implicant: " << i << " minterm: " << minterms[j] << '\n';
 			}
 		}
 	}
-
-	//std::cout << "IMPLICANTS TEST\n";
-	//for (const auto& impl : epi)
-	//{
-	//	std::cout << impl.word << ' ' << impl.essential << '\n';
-	//}
 
 	for (Impl& impl : prime_implicants)
 	{
@@ -932,40 +909,6 @@ void qmc(std::vector<int>& minterms, const std::string& vars, std::vector<int> d
 
 	std::ranges::sort(covered_minterms, [](const int left, const int right) { return left < right; });
 	covered_minterms.erase(std::unique(covered_minterms.begin(), covered_minterms.end(), [](const int left, const int right) { return left == right; }), covered_minterms.end());
-
-
-	//std::cout << "\nFORMA MINIMALNA(niekoniecznie jedyna mozliwa): ";
-	//if (covered_minterms.size() == minterms.size())
-	//{
-	//	int counter = 0;
-	//
-	//	for (const std::string& epi : essential_prime_implicants)
-	//	{
-	//		for (int i = 0; i < vars.size(); i++)
-	//		{
-	//			if (epi[i] != 'x')
-	//			{
-	//				if (epi[i] == '0')
-	//				{
-	//					std::cout << vars[i] << '\'';
-	//				}
-	//				else if (epi[i] == '1')
-	//				{
-	//					std::cout << vars[i];
-	//				}
-	//			}
-	//		}
-	//		if (counter < essential_prime_implicants.size() - 1)
-	//			std::cout << '+';
-	//
-	//		counter++;
-	//	}
-	//}
-	//else
-	//{
-	//
-	//}
-	//std::cout << '\n';
 }
 
 void replace(std::string& exp, const size_t left, const size_t right)
@@ -1202,14 +1145,23 @@ std::vector<Token> tokenize(const std::string& exp)
 
 int main()
 {
-	bool log_ops = false;
+	constexpr bool log_ops = false;
 	
 	int op = -1;
-	std::cout << "======================== Quine McCluskey ========================\n[1] Wprowadzanie mintermow\n[2] Wprowadzanie zdania logicznego\n";
+
+	std::cout << "Choose language:\n[0] Polish\n[1] English\nChoice: ";
+	std::cin >> english;
+
+	std::cout << "======================== Quine McCluskey ========================\n";
+	if (english) std::cout << "[1] Enter minterms\n[2] Enter logical expression\n";
+	else std::cout << "[1] Wprowadzanie mintermow\n[2] Wprowadzanie zdania logicznego\n";
 	
 	while (op != 1 && op != 2)
 	{
-		std::cout << "Wybor: ";
+		if (english)
+			std::cout << "Choice: ";
+		else
+			std::cout << "Wybor: ";
 		std::cin >> op;
 	}
 	
@@ -1218,7 +1170,10 @@ int main()
 		std::vector<int> minterms;
 		std::vector<int> dont_cares;
 		int m = 0;
-		std::cout << "Wprowadz mintermy (wpisz -1 aby zakonczyc):\n";
+
+		if (english) std::cout << "Enter minterms (type -1 to finish):\n";
+		else std::cout << "Wprowadz mintermy (wpisz -1 aby zakonczyc):\n";
+
 		do
 		{
 			std::cout << ">> ";
@@ -1228,7 +1183,10 @@ int main()
 		} while (m != -1);
 		minterms.pop_back();
 		m = 0;
-		std::cout << "Wprowadz don't care'y (wpisz -1 aby zakonczyc):\n";
+
+		if (english) std::cout << "Enter don't cares (type -1 to finish):\n";
+		else std::cout << "Wprowadz don't care'y (wpisz -1 aby zakonczyc):\n";
+
 		do
 		{
 			std::cout << ">> ";
@@ -1253,7 +1211,8 @@ int main()
 				vars_unmod += i;
 			}
 	
-			std::cout << "Wprowadz " << vars_size << " oznaczen(ia) (litery, domyslnie: " << vars_unmod << "):\n>> ";
+			if (english) std::cout << "Enter " << vars_size << " label(s) (letters, default: " << vars_unmod << "):\n>> ";
+			else std::cout << "Wprowadz " << vars_size << " oznaczen(ia) (litery, domyslnie: " << vars_unmod << "):\n>> ";
 	
 			do
 			{
@@ -1265,10 +1224,17 @@ int main()
 				vars_unmod = vars;
 				std::sort(vars.begin(), vars.end());
 				vars.erase(std::unique(vars.begin(), vars.end()), vars.end());
+				
 				if (vars.size() > vars_size)
-					std::cout << "ZA DUZO OZNACZEN!\n>>";
+				{
+					if (english) std::cout << "TOO MANY LABELS!\n>>";
+					else std::cout << "ZA DUZO OZNACZEN!\n>>";
+				}
 				else if (vars.size() < vars_size)
-					std::cout << "ZA MALO OZNACZEN!\n>>";
+				{
+					if (english) std::cout << "TOO FEW LABELS!\n>>";
+					else std::cout << "ZA MALO OZNACZEN!\n>>";
+				}
 			} while (vars.size() != vars_size);
 		}
 	
@@ -1277,21 +1243,37 @@ int main()
 			Timer t;
 			qmc(minterms, vars_unmod, dont_cares);
 		}
-		std::cout << "\nPOROWNAN: " << c << '\n';
+
+		if (english) std::cout << "\nCOMPARISONS: " << c << '\n';
+		else std::cout << "\nPOROWNAN: " << c << '\n';
 	}
 	else
 	{
-		std::cout << "Wprowadz zdanie logiczne: ";
-		std::string exp;// = "A*B*!C*!D+A*B*!C*D+A*!B*!C*D+A*B*C*D+A*!B*C*D+A*B*C*!D+A*!B*C*!D"; //firgure out
+		if (english) std::cout << "Enter logical expression: ";
+		else std::cout << "Wprowadz zdanie logiczne: ";
+
+		std::string exp;// = "A*B*!C*!D+A*B*!C*D+A*!B*!C*D+A*B*C*D+A*!B*C*D+A*B*C*!D+A*!B*C*!D"; //figure out
 		std::cin >> exp;
 		std::cin.ignore();
 		exp.erase(std::remove_if(exp.begin(), exp.end(), [](char c) {return c == ' '; }), exp.end());
 		std::cout << exp << " = X\n";
 		std::stack<char> RPN = log_ops ? shuntingYardLog(exp) : shuntingYard(exp);
+
+		if constexpr (log_ops)
+		{
+			RPN = shuntingYardLog(exp);
+		}
+		else
+		{
+			RPN = shuntingYard(exp);
+		}
+
 		std::string vars;
 		std::vector<int> minterms = truthTable(RPN, vars);
 	
-		std::cout << "\nMINTERMY: ";
+		if (english) std::cout << "\nMINTERMS: ";
+		else std::cout << "\nMINTERMY: ";
+
 		for (int i = 0; i < minterms.size() - 1; i++)
 		{
 			std::cout << minterms[i] << ' ';
@@ -1302,7 +1284,9 @@ int main()
 			Timer t;
 			qmc(minterms, vars);
 		}
-		std::cout << "\nPOROWNAN: " << c << '\n';
+
+		if (english) std::cout << "\nCOMPARISONS: " << c << '\n';
+		else std::cout << "\nPOROWNAN: " << c << '\n';
 		//std::cin.get();
 	}
 }
